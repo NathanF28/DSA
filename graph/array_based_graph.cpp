@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <queue>
+
 using namespace std;
 
 class Graph{
@@ -34,6 +36,40 @@ class Graph{
                 cout << i << " : " << List[i][j] << " ";
             }
             cout << endl;
+        }
+    }
+    void DFS_start(int value){
+        vector<bool> visited(vertices,false);
+        DFS(value,visited);
+    }
+    void DFS(int value, vector<bool>& visited){
+        visited[value] = true;
+        cout << value << " ";
+
+        for(int neighbor: List[value]){
+            if(!visited[neighbor]){
+                DFS(neighbor,visited);
+            }
+        } 
+
+    }
+    void BFS(int start){
+        vector<bool> visited(vertices,false);
+        queue<int> q;
+
+        visited[start] = true;
+        while(q.size() > 0){
+            if (visited[start]){
+                cout << q.front() << " ";
+                q.pop(); 
+                for(int neighbor : List[start]){
+                    if(!visited[neighbor]){
+                        visited[neighbor] = true;
+                        q.push(neighbor);
+                    }
+                }
+
+            }
         }
     }
 };
