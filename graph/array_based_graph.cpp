@@ -1,39 +1,40 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <queue>
-
 using namespace std;
 
 class Graph{
     int vertices;
     vector<vector<int>> adjMatrix;
-    vector<vector<int>> List; 
-
+    vector<vector<int>> Lists;
+public:
     Graph(int value){
         vertices = value;
         adjMatrix.resize(vertices,vector<int>(vertices,0));
-        List.resize(vertices);
+        Lists.resize(vertices);
     }
 
     void addEdge(int u, int v){
         adjMatrix[u][v] = 1;
         adjMatrix[v][u] = 1;
-        List[u].push_back(v);
-        List[v].push_back(u);
+        Lists[u].push_back(v);
+        Lists[v].push_back(u); 
     }
 
     void displayMatrix(){
-        for (int i = 0; i < vertices; i++){
-            for(int j = 0; j < vertices;j++){
+        for(int i = 0; i< vertices;i++){
+            for(int j=0; j < vertices; j++){
                 cout << adjMatrix[i][j] << " ";
             }
             cout << endl;
         }
     }
-    void displayList(){
-        for (int i = 0; i < vertices; i++){
-            for(int j = 0; j < List[i].size();j++){
-                cout << i << " : " << List[i][j] << " ";
+    void displayLists(){
+        for(int i = 0; i <vertices;i++){
+            cout << i << ":" << " ";
+            for(int j : Lists[i]){
+                cout << j << " ";
             }
             cout << endl;
         }
@@ -42,34 +43,54 @@ class Graph{
         vector<bool> visited(vertices,false);
         DFS(value,visited);
     }
-    void DFS(int value, vector<bool>& visited){
+    void DFS(int value,vector<bool>& visited){
         visited[value] = true;
-        cout << value << " ";
-
-        for(int neighbor: List[value]){
+        for(int neighbor : Lists[value]){
             if(!visited[neighbor]){
                 DFS(neighbor,visited);
             }
-        } 
+        }
+    }
+    void DFS_Iterative(int value){
+        vector<bool> visited(vertices, false);
+        stack<int> s;
+        s.push(value);
+        while (!s.empty()){
+             int top = s.top();
+            s.pop();
+            if(!visited[top]){
+                visited[top] = true;            
+            for(int neighbor: Lists[top]){
+                if(!visited[neighbor]){
+                    s.push(neighbor);
+                }
+            }
+            }
+        cout << endl;
+        }
 
     }
-    void BFS(int start){
-        vector<bool> visited(vertices,false);
+    void BFS(int value){
+        vector<int> visited(vertices,false);
         queue<int> q;
+        q.push(value);
 
-        visited[start] = true;
-        while(q.size() > 0){
-            if (visited[start]){
-                cout << q.front() << " ";
-                q.pop(); 
-                for(int neighbor : List[start]){
-                    if(!visited[neighbor]){
-                        visited[neighbor] = true;
-                        q.push(neighbor);
-                    }
+        while(!q.empty()){
+            int front = q.front();
+            q.pop();
+
+            if(!visited[value])
+            {                            
+            visited[front] == true;
+            for(int neighbor : Lists[front])
+            {
+                if(!visited[neighbor]){
+                    q.push(neighbor);
                 }
-
             }
+            }
+
+
         }
     }
 };
