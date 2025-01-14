@@ -222,6 +222,28 @@ public:
             }
         }     
     }
-
-
+    void inOrderTraversal(Node* node){
+        if(!node){
+            return;
+        }
+        inOrderTraversal(node->left);
+        cout << node->data << " ";
+        inOrderTraversal(node->right);
+    }
+    void preOrderTraversal(Node* node){
+        if(!node){
+            return;
+        }
+        cout << node->data << " ";
+        preOrderTraversal(node->left);
+        preOrderTraversal(node->right);
+    }
+    void postOrderTraversal(Node* node){
+        if(!node){
+            return;
+        }
+        postOrderTraversal(node->left);
+        postOrderTraversal(node->right);
+        cout << node->data << " ";
+    }
 };
