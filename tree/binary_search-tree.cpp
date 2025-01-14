@@ -1,28 +1,35 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 struct Node{
-    int key;
+    int data;
     Node* left;
     Node* right;
-    Node(int value) : key(value) , left(nullptr) , right(nullptr) {}
+    Node(int value) : data(value), left(nullptr), right(nullptr) {}
 };
 
-class BinarySearchTree{
-private:
+class BSTree{
     Node* root;
 public:
-    BinarySearchTree(): root(nullptr) {}
+    BSTree() : root(nullptr) {}
 
     void insert(int value){
         Node* newNode = new Node(value);
         if(!root){
-           root = newNode;
-           return; 
+            root = newNode;
+            return;
         }
         Node* curr = root;
         while(true){
-            if(value < curr->key){
+            if(value > curr->data){
+                if(!curr->right){
+                    curr->right = newNode;
+                    break;
+                }
+                curr = curr->right;
+            }
+            else if(value < curr->data){
                 if(!curr->left){
                     curr->left = newNode;
                     break;
@@ -30,119 +37,65 @@ public:
                 curr = curr->left;
             }
             else{
-                if(!curr->right){
-                    curr->right= newNode;
-                    break;
-                }
-                curr = curr->right;
-            }
-        } 
-    }
-    void deletebyCopy(int value){
-        Node* curr = root;
-        Node* parent;
-        while(true){   // searching for the node to be deleted
-            if(value > curr->key){
-                if(!curr->right){
-                    cout << "Value doesn't exist";  // incase we dont find it
-                    return;
-                }
-                parent = curr;       // needed when connecting parent with the deceased node children i.e    1 2 3 connecting 1 and 3 , curr is 2
-                curr = curr->right;
-            }
-            else if(value < curr->key) {
-                if(!curr->left){
-                    cout << "Value doesn't exist";
-                    return;
-            }
-                parent = curr;
-                curr = curr->left;
-            }
-            else{
+                cout << "Element already exists";
                 break;
             }
         }
-        if(!curr->right && !curr->left){   // incase of leaf node
-            if(curr == root){   // if the node to be deleted is root 
+    }
+    Node* insert_recursion(Node* node, int value){
+        if(!node){
+            return new Node(value);
+        }
+        if(value > node->data){
+            node->right = insert_recursion(node->right,value);
+        }
+        else{
+            node->left = insert_recursion(node->left,value);
+        }
+        return node;
+    }
+    Node* search(int value){
+        Node* curr = root;
+        while(curr){
+            if(value == curr->data)
+                return curr;
+            else if(value > curr->data)
+                curr = curr->right;
+            else
+                curr = curr->left;
+        }  
+        return nullptr;
+    }
+
+    void deletebyCopy(int value){
+        Node* curr = root;
+        if(!root){
+            cout << "empty";
+            return;
+        }
+        Node* parent;
+        while(curr){
+            if(value == curr->data){
+                break;
+            }
+            else if(value > curr->data){
+                parent = curr;
+                curr = curr->right;
+            }
+            else{
+                parent = curr;
+                curr = curr->left;
+            }
+        }
+        if(!curr){                        // Node with value doesn't exist
+            cout << "Element not found";
+            return;
+        }
+        if(!curr->left && !curr->right){  // Node has one child
+            if(!parent){
                 root = nullptr;
             }
             else if(parent->left == curr){
-                parent->left = nullptr;
-            }
-            else{
-                parent->right= nullptr;
-            }
-            delete curr;
-        }
-        else if(!curr->right || !curr->left){
-            Node* child = (curr->left) ? curr->left : curr->right ;
-            if(curr = root){
-                root = child;
-            }
-            if(parent->left == curr){
-                parent->left = child;
-            }
-            else{
-                parent->right = child;
-            }
-            delete curr; 
-        }
-        else{
-            Node* temp = Min_Max(curr->right,false);             
-            deletebyCopy(temp->key);
-            curr->key = temp->key;
-        }
-    }
-
-    Node* Min_Max(Node* node, bool value){
-        if(!node){
-            cout << "Nullptr";
-            return;
-        }
-        if (value){
-            while(node->right)
-                {
-                    node = node->right;
-                }
-            return node;
-        }
-        else{
-            while(node->left)
-                {
-                    node = node->left;
-                }
-            return node;
-        }
-    }
-    void deleteByMerge(int value, bool direction){
-        Node* curr = root;
-        Node* parent;
-        while(true){
-            if(curr->key < value){
-                if(!curr->right){
-                    cout<< "Value doesnt exist";
-                    return;
-                }
-                parent = curr;
-                curr = curr->right;
-            }
-            else if(curr->key > value) {
-                if(!curr->left){
-                    cout<< "Value doesnt exist";
-                    return;
-                }
-                parent = curr;
-                curr = curr->left;
-            }
-            else{
-                break;
-            }
-        }
-        if(!curr->left && !curr->right){
-            if (curr == root){
-                root = nullptr;
-            }
-            if(parent->left == curr){
                 parent->left = nullptr;
             }
             else{
@@ -150,12 +103,85 @@ public:
             }
             delete curr;
         }
-        else if(!curr->right || !curr->left){
-            Node* child = (curr->left) ? curr->left : curr->right;
-            if(curr == root){
+        else if(!curr->left || !curr->right){
+            Node* child = curr->left ? curr->left : curr->right;
+            if(!parent){
                 root = child;
             }
-            else if(curr == parent->left){
+            else if(parent->left == curr){
+                parent->left = child;
+            }
+            else{
+                parent->right = child;
+            }
+            delete curr;
+        }
+        else{
+            int temp = Max_Min(curr->right,true)->data;
+            deletebyCopy(temp);
+            curr->data = temp; 
+
+        }     
+    }
+    Node* Max_Min(Node* node, bool left){
+        if(!node){
+            cout << "empty";
+            return nullptr;
+        }
+        if(left){
+            while(node->left){
+            node = node->left;
+        }
+        }
+        else{
+            while (node->right){
+            node = node->right;
+        }
+        }
+        return node;
+    }
+    void deletebyMerge(int value, bool direction){
+        Node* curr = root;
+        if(!root){
+            cout << "empty";
+            return;
+        }
+        Node* parent;
+        while(curr){
+            if(value == curr->data){
+                break;
+            }
+            else if(value > curr->data){
+                parent = curr;
+                curr = curr->right;
+            }
+            else{
+                parent = curr;
+                curr = curr->left;
+            }
+        }
+        if(!curr){                        // Node with value doesn't exist
+            cout << "Element not found";
+            return;
+        }
+        if(!curr->left && !curr->right){  // Node has one child
+            if(!parent){
+                root = nullptr;
+            }
+            else if(parent->left == curr){
+                parent->left = nullptr;
+            }
+            else{
+                parent->right = nullptr;
+            }
+            delete curr;
+        }
+        else if(!curr->left || !curr->right){
+            Node* child = curr->left ? curr->left : curr->right;
+            if(!parent){
+                root = child;
+            }
+            else if(parent->left == curr){
                 parent->left = child;
             }
             else{
@@ -165,50 +191,37 @@ public:
         }
         else{
             if(direction){
-                if(parent->left == curr){
-                    parent->left = curr->right;
+                if(!parent){
+                    parent = curr->right;
+                    root = parent; // add this
                 }
                 else{
-                    parent->right = curr->right;
+                    if(parent->left == curr)
+                        parent->left = curr->right;
+                    else
+                        parent->right = curr->right;
                 }
-                Node* temp = Min_Max(curr->right,false);
-                temp->left = curr->left;
+                Node* node1 = Max_Min(curr->right,true);
+                node1->left = curr->left;
+                delete curr;
             }
             else{
-                if(parent->left == curr){
-                    parent->left = curr->left;
+                if(!parent){
+                    parent = curr->left;
+                    root = parent; // add this
                 }
                 else{
-                    parent->right = curr->left;
+                    if(parent->left == curr)
+                        parent->left = curr->left;
+                    else
+                        parent->right = curr->left;
                 }
-                Node* test = Min_Max(curr->left,true);
-                test->right = curr->right;
+                Node* node2 = Max_Min(curr->left,false);
+                node2->right = curr->right;
+                delete curr;
             }
-        }
+        }     
+    }
 
-    }
-    void preOrder(Node* node){
-        if(node == nullptr){
-            return;
-        }
-        cout << node->key <<  " ";
-        preOrder(node->left);
-        preOrder(node->right);
-    }
-    void inOrder(Node* node){
-        if(node == nullptr){
-            return;
-        }
-        preOrder(node->left);
-        cout << node->key <<  " ";
-        preOrder(node->right);
-    }
-    void postOrder(Node* node){
-        if(node == nullptr){
-            return;
-        }
-        preOrder(node->left);
-        preOrder(node->right);
-        cout << node->key <<  " ";
-    }
+
 };
