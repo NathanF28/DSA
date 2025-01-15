@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 struct Node {
@@ -90,6 +91,22 @@ class Linked_List_Stack{
             postfix+= pop();
         }
         return postfix;
+    }
+
+    char evaluate_Postfix(string expression){
+        for(char ch: expression){
+            if(isdigit(ch)) push(ch);
+            else{
+                int a = pop();
+                int b = pop();
+                if(ch == '+') push(a+b);
+                else if(ch == '-') push(a-b);
+                else if(ch == '*') push(a*b);
+                else if(ch == '/') push(int(a/b));
+                else if(ch == '^') push(pow(a,b));
+            }
+        }
+        return peek();
     }
 
 
